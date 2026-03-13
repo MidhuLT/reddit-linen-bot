@@ -4,16 +4,8 @@ from datetime import datetime, timedelta
 
 log = logging.getLogger(__name__)
 
-# Use PostgreSQL if DATABASE_URL is set (Railway), otherwise fall back to SQLite
 DATABASE_URL = os.getenv("DATABASE_URL", "")
-
-if DATABASE_URL:
-    import psycopg2
-    import psycopg2.extras
-    USE_POSTGRES = True
-else:
-    import sqlite3
-    USE_POSTGRES = False
+USE_POSTGRES = bool(DATABASE_URL)
 
 from config import DB_FILE
 
@@ -23,6 +15,7 @@ from config import DB_FILE
 # --------------------------------------------------------------------------- #
 
 def _pg_conn():
+    import psycopg2
     return psycopg2.connect(DATABASE_URL, sslmode="require")
 
 
@@ -75,10 +68,11 @@ def _pg_cleanup(days: int = 90):
 
 
 # --------------------------------------------------------------------------- #
-# SQLite helpers (local dev fallback)
+# SQLite helpers
 # --------------------------------------------------------------------------- #
 
 def _sq_init():
+    import sqlite3
     conn = sqlite3.connect(DB_FILE)
     cur  = conn.cursor()
     cur.execute("""
@@ -94,6 +88,7 @@ def _sq_init():
 
 
 def _sq_was_sent(post_id: str) -> bool:
+    import sqlite3
     conn = sqlite3.connect(DB_FILE)
     cur  = conn.cursor()
     cur.execute("SELECT 1 FROM sent_posts WHERE post_id = ?", (post_id,))
@@ -103,6 +98,7 @@ def _sq_was_sent(post_id: str) -> bool:
 
 
 def _sq_mark_sent(post_id: str, link: str, title: str):
+    import sqlite3
     conn = sqlite3.connect(DB_FILE)
     cur  = conn.cursor()
     cur.execute(
@@ -114,6 +110,7 @@ def _sq_mark_sent(post_id: str, link: str, title: str):
 
 
 def _sq_cleanup(days: int = 90):
+    import sqlite3
     cutoff = (datetime.utcnow() - timedelta(days=days)).isoformat()
     conn = sqlite3.connect(DB_FILE)
     cur  = conn.cursor()
@@ -123,7 +120,7 @@ def _sq_cleanup(days: int = 90):
 
 
 # --------------------------------------------------------------------------- #
-# Public API — same interface regardless of backend
+# Public API
 # --------------------------------------------------------------------------- #
 
 def init_db():
