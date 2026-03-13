@@ -77,7 +77,7 @@ def _html_empty() -> str:
     return """
       <div style="text-align:center;padding:40px 0;color:#999;">
         <p style="font-size:40px;margin:0;">🔍</p>
-        <p style="margin:12px 0 0 0;font-size:15px;">No new linen posts found today.<br>Check back tomorrow!</p>
+        <p style="margin:12px 0 0 0;font-size:15px;">🔍 No new linen posts found after checking 20 times across the last 30 days.<br>Reddit may be quiet on linen topics right now — will check again tomorrow!</p>
       </div>
 """
 
@@ -134,7 +134,10 @@ def send_email(posts: list):
 
     context = ssl.create_default_context()
     try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.ehlo()
+            server.starttls(context=context)
+            server.ehlo()
             server.login(EMAIL_FROM, GMAIL_APP_PASSWORD)
             server.sendmail(EMAIL_FROM, EMAIL_TO, msg.as_string())
         print(f"[emailer] ✅ Email sent → {EMAIL_TO}  ({len(posts)} posts)")
