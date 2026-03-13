@@ -115,7 +115,7 @@ def send_email(posts: list):
         return
 
     payload = json.dumps({
-        "personalizations": [{"to": [{"email": EMAIL_TO}]}],
+        "personalizations": [{"to": [{"email": e.strip()} for e in EMAIL_TO.split(",") if e.strip()]}],
         "from":    {"email": EMAIL_FROM},
         "subject": subject,
         "content": [{"type": "text/html", "value": html}],
