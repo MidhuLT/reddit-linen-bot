@@ -59,7 +59,7 @@ def _parse_feed(url: str, subreddit_label: str, query: str) -> list:
         feed = feedparser.parse(url, request_headers=HEADERS)
 
         if feed.bozo and feed.bozo_exception:
-            log.warning(f"Feed warning ({subreddit_label} / {query}): {feed.bozo_exception}")
+            log.debug(f"Feed note ({subreddit_label} / {query}): {feed.bozo_exception}")
 
         if not feed.entries:
             log.debug(f"No entries for: {url}")
